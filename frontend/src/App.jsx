@@ -1,286 +1,525 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  ChefHat, Zap, ArrowRight, ShieldCheck, SquareMenu, 
-  X, Beef, CalendarClock, Plus, Smartphone, 
-  MonitorPlay, MapPin, Users, Check, Loader2, ArrowLeft, Minus, Database
-} from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, ChevronLeft, Send, CheckCircle2, Info, ArrowLeft, ShoppingBag } from 'lucide-react';
+import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-export default function AutoRestoPretotype() {
-  const [flowStep, setFlowStep] = useState('chat');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-  const [leads, setLeads] = useState([]);
-  
-  const [restaurantName, setRestaurantName] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [painPoint, setPainPoint] = useState('Vender más (WhatsApp Flows)');
+// Mock de datos: Añadido "1/8 de Pollo" como pediste
+const MENU_ITEMS = [
+  { id: '1', name: 'Pollo Entero', desc: 'Ideal para 4 personas.', price: 65.00, customizable: true },
+  { id: '2', name: '1/2 Pollo', desc: 'Para compartir.', price: 35.00, customizable: true },
+  { id: '3', name: '1/4 de Pollo', desc: 'Porción personal.', price: 20.00, customizable: true },
+  { id: '6', name: '1/8 de Pollo', desc: 'Para el antojo.', price: 12.00, customizable: true },
+  { id: '4', name: 'Porción de Tequeños', desc: 'Seis unidades con salsa de palta.', price: 12.00, customizable: false },
+  { id: '7', name: 'Porción de Ensalada', desc: 'Fresca clásica.', price: 8.00, customizable: false },
+  { id: '5', name: 'Gaseosa 1.5L', desc: 'Inca Kola o Coca Cola.', price: 10.00, customizable: false },
+];
 
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-  const [isPressing, setIsPressing] = useState(false);
+const GUARNICIONES = ['Pura Papa', 'Combinado (Papa y Ensalada)', 'Pura Ensalada'];
+const CREMAS = ['Ají Pollero', 'Mayonesa', 'Ketchup', 'Ocopa', 'Mostaza'];
 
-  // Fetch leads to show in the "Live Dashboard"
-  const fetchLeads = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/leads`);
-      if (response.ok) {
-        const data = await response.json();
-        setLeads(data);
-      }
-    } catch (error) {
-      console.error('Error fetching leads:', error);
+export default function WhatsAppFlowSimulator() {
+  const [isFlowOpen, setIsFlowOpen] = useState(false);
+  const [flowStep, setFlowStep] = useState(1);
+  const [chatMessages, setChatMessages] = useState([
+    {
+      id: 1,
+      sender: 'business',
+      time: '18:30',
+      text: '¡Hola! Bienvenido a *Pollería El Buen Sabor* 🍗🔥.\n\nPara hacer tu pedido de forma rápida y sencilla, toca el botón de abajo. 👇',
+      hasFlowButton: true
     }
-  };
+  ]);
+  
+  const [formData, setFormData] = useState({
+    selectedItems: [],
+    customizations: {}, 
+    name: '',
+    address: '',
+    reference: '',
+    paymentMethod: 'efectivo'
+  });
+
+  const chatEndRef = useRef(null);
 
   useEffect(() => {
-    fetchLeads();
-    const interval = setInterval(fetchLeads, 5000); // Poll every 5s
-    return () => clearInterval(interval);
-  }, []);
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
 
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setCursorPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  const handleOpenFlow = () => {
+    setIsFlowOpen(true);
+    setFlowStep(1);
+    setFormData({
+      selectedItems: [],
+      customizations: {},
+      name: '',
+      address: '',
+      reference: '',
+      paymentMethod: 'efectivo'
+    });
   };
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      const response = await fetch(`${API_URL}/api/leads`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ restaurantName, whatsapp, painPoint }),
-      });
+  const handleCloseFlow = () => setIsFlowOpen(false);
 
-      if (response.ok) {
-        setIsSubmitting(false);
-        setFlowStep('success');
-        fetchLeads(); // Refresh dashboard
+  // Seleccionar productos y preparar sus personalizaciones al instante
+  const handleItemToggle = (itemId) => {
+    setFormData(prev => {
+      const isSelected = prev.selectedItems.includes(itemId);
+      let newSelected = [];
+      let newCustomizations = { ...prev.customizations };
+
+      if (isSelected) {
+        newSelected = prev.selectedItems.filter(id => id !== itemId);
+        delete newCustomizations[itemId]; 
       } else {
-        setIsSubmitting(false);
-        setFlowStep('success');
+        newSelected = [...prev.selectedItems, itemId];
+        const item = MENU_ITEMS.find(i => i.id === itemId);
+        if (item.customizable) {
+          newCustomizations[itemId] = { guarnicion: 'Combinado (Papa y Ensalada)', cremas: [] };
+        }
       }
-    } catch (error) {
-      setIsSubmitting(false);
-      setFlowStep('success');
-    }
+      return { ...prev, selectedItems: newSelected, customizations: newCustomizations };
+    });
   };
 
-  const resetFlow = () => {
-    setFlowStep('chat');
-    setCartCount(0);
-    setRestaurantName('');
-    setWhatsapp('');
+  const handleGuarnicionChange = (itemId, value) => {
+    setFormData(prev => ({
+      ...prev,
+      customizations: {
+        ...prev.customizations,
+        [itemId]: { ...prev.customizations[itemId], guarnicion: value }
+      }
+    }));
   };
+
+  const handleCremaToggle = (itemId, crema) => {
+    setFormData(prev => {
+      const currentCremas = prev.customizations[itemId].cremas;
+      const hasCrema = currentCremas.includes(crema);
+      const newCremas = hasCrema 
+        ? currentCremas.filter(c => c !== crema)
+        : [...currentCremas, crema];
+
+      return {
+        ...prev,
+        customizations: {
+          ...prev.customizations,
+          [itemId]: { ...prev.customizations[itemId], cremas: newCremas }
+        }
+      };
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const calculateTotal = () => {
+    return formData.selectedItems.reduce((total, itemId) => {
+      const item = MENU_ITEMS.find(i => i.id === itemId);
+      return total + (item ? item.price : 0);
+    }, 0);
+  };
+
+  const handleSubmitFlow = async () => {
+    const total = calculateTotal();
+    
+    // Preparar datos para el backend
+    const orderData = {
+      ...formData,
+      total: total
+    };
+
+    try {
+      // Enviar al backend
+      await axios.post(`${API_URL}/orders`, orderData);
+      console.log("Pedido guardado en BD");
+    } catch (error) {
+      console.error("Error al guardar pedido:", error);
+    }
+
+    setIsFlowOpen(false);
+    
+    const orderItems = formData.selectedItems.map(id => {
+      const item = MENU_ITEMS.find(i => i.id === id);
+      let text = `*${item.name}*`;
+      
+      if (item.customizable && formData.customizations[id]) {
+        const cust = formData.customizations[id];
+        text += `\n  ↳ _Guarnición:_ ${cust.guarnicion}`;
+        text += `\n  ↳ _Cremas:_ ${cust.cremas.length > 0 ? cust.cremas.join(', ') : 'Ninguna'}`;
+      }
+      return text;
+    }).join('\n\n');
+
+    const customerMsg = {
+      id: Date.now(),
+      sender: 'customer',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      text: `📝 *Mi Pedido*\n\n${orderItems}\n\n*Total:* S/ ${total.toFixed(2)}\n\n*Entrega a:*\n${formData.name}\n${formData.address}\n\n*Pago:* ${formData.paymentMethod === 'efectivo' ? 'Efectivo contra entrega' : 'Yape / Plin'}`
+    };
+
+    setChatMessages(prev => [...prev, customerMsg]);
+
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        sender: 'business',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        text: `¡Excelente, ${formData.name.split(' ')[0]}! ✅🍗\n\nTu pedido personalizado ya está en la cocina y llegará a tu domicilio pronto. 🛵💨`
+      }]);
+    }, 1500);
+  };
+
+  // --- PANTALLA 1: MENÚ CON DESGLOSE INSTANTÁNEO ---
+  const renderFlowStep1 = () => (
+    <div className="flex flex-col h-full bg-[#f0f2f5]">
+      <div className="p-4 bg-white shadow-sm mb-2 z-10 sticky top-0">
+        <h3 className="font-bold text-[#111b21] text-lg mb-1">Nuestro Menú 🍗</h3>
+        <p className="text-sm text-[#667781]">Selecciona tus productos. Las opciones aparecerán al instante.</p>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 pb-24">
+        {MENU_ITEMS.map((item) => {
+          const isSelected = formData.selectedItems.includes(item.id);
+          const itemCustomization = formData.customizations[item.id];
+
+          return (
+            <div key={item.id} className={`bg-white rounded-xl shadow-sm border transition-all duration-300 ${isSelected ? 'border-[#00a884]' : 'border-gray-200'}`}>
+              
+              {/* Fila Principal del Producto */}
+              <label className="flex items-start p-4 cursor-pointer">
+                <div className="flex-1">
+                  <h4 className={`font-semibold ${isSelected ? 'text-[#00a884]' : 'text-[#111b21]'}`}>{item.name}</h4>
+                  <p className="text-sm text-[#667781] mt-1">{item.desc}</p>
+                  <p className="font-bold text-[#111b21] mt-2">S/ {item.price.toFixed(2)}</p>
+                </div>
+                <div className="ml-4 mt-1">
+                  <input 
+                    type="checkbox" 
+                    className="w-6 h-6 accent-[#00a884] rounded-md border-gray-300 focus:ring-[#00a884]"
+                    checked={isSelected}
+                    onChange={() => handleItemToggle(item.id)}
+                  />
+                </div>
+              </label>
+
+              {/* SECCIÓN DESGLOSADA (Condicional/Acordeón) */}
+              {isSelected && item.customizable && itemCustomization && (
+                <div className="px-4 pb-4 pt-2 bg-gray-50 border-t border-gray-100 animate-in slide-in-from-top-2 fade-in duration-200 rounded-b-xl">
+                  
+                  {/* Guarnición */}
+                  <h5 className="text-sm font-bold text-[#111b21] mb-2 mt-2">1. Elige tu guarnición:</h5>
+                  <div className="space-y-2 mb-4 bg-white p-3 rounded-lg border border-gray-200">
+                    {GUARNICIONES.map(guarnicion => (
+                      <label key={guarnicion} className="flex items-center cursor-pointer">
+                        <input 
+                          type="radio" 
+                          name={`guarnicion-${item.id}`}
+                          value={guarnicion}
+                          checked={itemCustomization.guarnicion === guarnicion}
+                          onChange={(e) => handleGuarnicionChange(item.id, e.target.value)}
+                          className="w-5 h-5 text-[#00a884] focus:ring-[#00a884] border-gray-300"
+                        />
+                        <span className="ml-3 text-sm text-[#111b21]">{guarnicion}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Cremas */}
+                  <h5 className="text-sm font-bold text-[#111b21] mb-2">2. Elige tus cremas:</h5>
+                  <div className="grid grid-cols-2 gap-2 bg-white p-3 rounded-lg border border-gray-200">
+                    {CREMAS.map(crema => (
+                      <label key={crema} className="flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={itemCustomization.cremas.includes(crema)}
+                          onChange={() => handleCremaToggle(item.id, crema)}
+                          className="w-5 h-5 accent-[#00a884] rounded border-gray-300 focus:ring-[#00a884]"
+                        />
+                        <span className="ml-2 text-sm text-[#111b21] truncate">{crema}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="p-4 bg-white border-t border-gray-200 absolute bottom-0 w-full z-10">
+        <button 
+          onClick={() => setFlowStep(2)}
+          disabled={formData.selectedItems.length === 0}
+          className={`w-full py-3 rounded-full font-bold transition-colors ${formData.selectedItems.length > 0 ? 'bg-[#00a884] text-white shadow-md hover:bg-[#008f6f]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+        >
+          Ir a Datos de Envío (S/ {calculateTotal().toFixed(2)})
+        </button>
+      </div>
+    </div>
+  );
+
+  // --- PANTALLA 2: DATOS DE ENVÍO ---
+  const renderFlowStep2 = () => (
+    <div className="flex flex-col h-full bg-[#f0f2f5]">
+      <div className="p-4 bg-white shadow-sm mb-2 flex items-center">
+        <button onClick={() => setFlowStep(1)} className="mr-3 p-1 rounded-full hover:bg-gray-100 text-[#54656f]">
+          <ArrowLeft size={20} />
+        </button>
+        <div>
+          <h3 className="font-bold text-[#111b21] text-lg">Datos de Envío 🛵</h3>
+          <p className="text-sm text-[#667781]">¿A dónde llevamos el pedido?</p>
+        </div>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <label className="block text-sm font-medium text-[#111b21] mb-2">Nombre completo</label>
+          <input 
+            type="text" 
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder="Ej. Juan Pérez"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00a884] focus:ring-1 focus:ring-[#00a884]"
+          />
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <label className="block text-sm font-medium text-[#111b21] mb-2">Dirección de entrega</label>
+          <input 
+            type="text" 
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+            placeholder="Ej. Av. Los Fresnos 123"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00a884] focus:ring-1 focus:ring-[#00a884] mb-3"
+          />
+          <label className="block text-sm font-medium text-[#111b21] mb-2">Referencia (Opcional)</label>
+          <input 
+            type="text" 
+            name="reference"
+            value={formData.reference}
+            onChange={handleInputChange}
+            placeholder="Frente al parque"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#00a884] focus:ring-1 focus:ring-[#00a884]"
+          />
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <label className="block text-sm font-medium text-[#111b21] mb-3">Método de pago</label>
+          <div className="space-y-3">
+            <label className="flex items-center cursor-pointer">
+              <input 
+                type="radio" 
+                name="paymentMethod" 
+                value="efectivo"
+                checked={formData.paymentMethod === 'efectivo'}
+                onChange={handleInputChange}
+                className="w-5 h-5 text-[#00a884] focus:ring-[#00a884] border-gray-300"
+              />
+              <span className="ml-3 text-[#111b21]">Efectivo contra entrega</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+              <input 
+                type="radio" 
+                name="paymentMethod" 
+                value="yape"
+                checked={formData.paymentMethod === 'yape'}
+                onChange={handleInputChange}
+                className="w-5 h-5 text-[#00a884] focus:ring-[#00a884] border-gray-300"
+              />
+              <span className="ml-3 text-[#111b21]">Yape / Plin</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4 bg-white border-t border-gray-200">
+        <button 
+          onClick={() => setFlowStep(3)}
+          disabled={!formData.name || !formData.address}
+          className={`w-full py-3 rounded-full font-bold transition-colors ${formData.name && formData.address ? 'bg-[#00a884] text-white hover:bg-[#008f6f]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+        >
+          Revisar y Enviar
+        </button>
+      </div>
+    </div>
+  );
+
+  // --- PANTALLA 3: RESUMEN FINAL ---
+  const renderFlowStep3 = () => (
+    <div className="flex flex-col h-full bg-[#f0f2f5]">
+      <div className="p-4 bg-white shadow-sm mb-2 flex items-center">
+        <button onClick={() => setFlowStep(2)} className="mr-3 p-1 rounded-full hover:bg-gray-100 text-[#54656f]">
+          <ArrowLeft size={20} />
+        </button>
+        <div>
+          <h3 className="font-bold text-[#111b21] text-lg">Confirma tu Pedido</h3>
+          <p className="text-sm text-[#667781]">Revisa que todo esté correcto.</p>
+        </div>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="bg-white p-5 rounded-lg shadow-sm">
+          <h4 className="font-bold text-[#111b21] border-b pb-2 mb-3">Tus Productos</h4>
+          <div className="space-y-4 mb-4 text-[#111b21]">
+            {formData.selectedItems.map(id => {
+              const item = MENU_ITEMS.find(i => i.id === id);
+              const custom = formData.customizations[id];
+              return (
+                <div key={id} className="text-sm">
+                  <div className="flex justify-between font-bold">
+                    <span>1x {item.name}</span>
+                    <span>S/ {item.price.toFixed(2)}</span>
+                  </div>
+                  {custom && (
+                    <div className="text-[#54656f] mt-1 pl-4 border-l-2 border-[#00a884]">
+                      <p>• {custom.guarnicion}</p>
+                      <p>• Cremas: {custom.cremas.length > 0 ? custom.cremas.join(', ') : 'Ninguna'}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex justify-between font-bold text-lg text-[#111b21] border-t pt-3">
+            <span>Total:</span>
+            <span className="text-[#00a884]">S/ {calculateTotal().toFixed(2)}</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-lg shadow-sm">
+          <h4 className="font-bold text-[#111b21] border-b pb-2 mb-3">Datos de Entrega</h4>
+          <div className="text-sm text-[#54656f] space-y-1">
+            <p><span className="font-medium text-[#111b21]">A nombre de:</span> {formData.name}</p>
+            <p><span className="font-medium text-[#111b21]">Dirección:</span> {formData.address}</p>
+            {formData.reference && <p><span className="font-medium text-[#111b21]">Ref:</span> {formData.reference}</p>}
+            <p><span className="font-medium text-[#111b21]">Pago:</span> {formData.paymentMethod === 'efectivo' ? 'Efectivo' : 'Yape / Plin'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4 bg-white border-t border-gray-200">
+        <button 
+          onClick={handleSubmitFlow}
+          className="w-full py-3 rounded-full font-bold bg-[#00a884] text-white hover:bg-[#008f6f] transition-colors flex justify-center items-center gap-2 shadow-lg"
+        >
+          <Send size={18} />
+          Enviar Pedido por WhatsApp
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-50 font-sans relative overflow-x-hidden">
-      <style dangerouslySetInnerHTML={{__html: `
-        .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); }
-        .gradient-text { background: linear-gradient(to right, #4ade80, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .perspective-1000 { perspective: 1000px; }
-        .rotate-y-12 { transform: rotateY(-12deg) rotateX(5deg); }
-        @keyframes slideUpFlow { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
-        .flow-sheet-enter { animation: slideUpFlow 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .btn-glow { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; }
-        .btn-glow:hover { box-shadow: 0 6px 30px rgba(16, 185, 129, 0.5); transform: translateY(-2px); }
-        .feature-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(51, 65, 85, 0.5); backdrop-filter: blur(10px); border-radius: 1.5rem; transition: all 0.3s; }
-        .feature-card:hover { border-color: #3b82f6; transform: translateY(-3px); }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .thumb-cursor { width: 40px; height: 40px; background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50%; position: absolute; pointer-events: none; z-index: 100; transition: transform 0.1s ease-out; backdrop-filter: blur(2px); }
-        .phone-container:hover .thumb-cursor { opacity: 1; }
-        .phone-container { cursor: none; }
-        @media (max-width: 640px) { .phone-frame { transform: scale(0.8); transform-origin: top center; } .phone-container { cursor: auto; } .thumb-cursor { display: none; } }
-      `}} />
-
-      <div className="absolute inset-0 bg-grid z-0"></div>
-
-      <nav className="max-w-7xl mx-auto p-6 flex justify-between items-center relative z-10">
-        <div className="flex items-center gap-3 font-extrabold text-2xl tracking-tight">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <ChefHat className="w-6 h-6 text-slate-900" />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 font-sans">
+      
+      <div className="flex flex-col lg:flex-row gap-8 max-w-6xl w-full items-center lg:items-start justify-center">
+        
+        {/* Panel de Información */}
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-gray-200 order-2 lg:order-1">
+          <div className="flex items-center gap-3 mb-6 text-[#00a884]">
+            <ShoppingBag size={28} />
+            <h2 className="text-2xl font-bold text-gray-800">Desglose Instántaneo (Renderizado Condicional)</h2>
           </div>
-          <span>Auto<span className="text-emerald-400">Resto</span></span>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-6 pt-12 pb-24 relative z-10 flex flex-col lg:flex-row items-center gap-16">
-        <div className="flex-1 space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-sm">
-            <Zap className="w-4 h-4" />
-            WhatsApp Flows & IA Pretotipo
-          </div>
-          <h1 className="text-5xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight">
-            Tus ventas vuelan. <br/>
-            <span className="gradient-text">Tu gestión se automatiza.</span>
-          </h1>
-          <p className="text-xl text-slate-400 leading-relaxed max-w-2xl">
-            Experimenta el futuro de los restaurantes. Usa el móvil a la derecha para simular un pedido. Los datos se guardarán en tiempo real en nuestra base de datos.
+          
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            WhatsApp Flows permite modificar la interfaz en tiempo real sin recargar la página, utilizando variables de estado internas.
           </p>
-          <div className="flex flex-wrap gap-4">
-             <div className="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50 flex flex-col items-center justify-center min-w-[120px]">
-                <span className="text-3xl font-bold text-emerald-400">{leads.length}</span>
-                <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Leads en BD</span>
-             </div>
-             <div className="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50 flex flex-col items-center justify-center min-w-[120px]">
-                <span className="text-3xl font-bold text-blue-400">99%</span>
-                <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Automatización</span>
-             </div>
+
+          <div className="space-y-4">
+            <h3 className="font-bold text-gray-800">¿Cómo se programa esto en Meta?</h3>
+            <ul className="space-y-3">
+              <li className="flex gap-3 text-sm text-gray-600">
+                <CheckCircle2 className="text-[#00a884] shrink-0" size={20} />
+                <span><b>Propiedad <code>visible</code>:</b> En el JSON de Flows, los bloques de guarnición están ocultos. Se programan con <code>"visible": "$&#123;data.is_pollo_checked&#125;"</code>, de modo que solo aparecen si marcas el pollo.</span>
+              </li>
+              <li className="flex gap-3 text-sm text-gray-600">
+                <CheckCircle2 className="text-[#00a884] shrink-0" size={20} />
+                <span><b>Agilidad (UX):</b> Esto mejora la experiencia del usuario (UX) enormemente porque ven el menú completo y personalizan sus productos en un solo vistazo, como en Rappi o PedidosYa.</span>
+              </li>
+              <li className="flex gap-3 text-sm text-gray-600">
+                <CheckCircle2 className="text-[#00a884] shrink-0" size={20} />
+                <span><b>Múltiples Pollo:</b> Como verás, puedes marcar el 1/4 de pollo y configurarlo, y al mismo tiempo marcar el 1/8 de pollo y configurarlo con otras cremas diferentes de forma independiente.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="mt-8 p-4 bg-green-50 text-green-800 rounded-lg text-sm flex gap-3 border border-green-200">
+            <Info size={24} className="shrink-0 text-green-600" />
+            <p><strong>Haz la prueba en el celular:</strong> Marca "1/4 de Pollo" e inmediatamente verás cómo se despliegan sus opciones. Marca también "1/8 de Pollo" o una ensalada. ¡Todo fluye en una sola pantalla!</p>
           </div>
         </div>
 
-        <div className="w-full lg:w-[450px] shrink-0 flex justify-center lg:justify-end perspective-1000">
-          <div className="phone-container relative" onMouseMove={handleMouseMove} onMouseDown={() => setIsPressing(true)} onMouseUp={() => setIsPressing(false)}>
-            <div className="thumb-cursor opacity-0 transition-opacity duration-300 flex items-center justify-center" style={{ left: `${cursorPos.x - 20}px`, top: `${cursorPos.y - 20}px`, transform: isPressing ? 'scale(0.8)' : 'scale(1)' }}>
-              <div className={`w-full h-full rounded-full bg-white/10 ${isPressing ? 'animate-ping' : ''}`}></div>
+        {/* Mockup del Teléfono */}
+        <div className="w-[360px] h-[700px] bg-black rounded-[40px] shadow-2xl relative overflow-hidden border-[8px] border-gray-900 flex flex-col shrink-0 order-1 lg:order-2">
+          
+          <div className="bg-[#008069] text-white p-3 flex items-center gap-3 shrink-0 z-10 relative shadow-sm">
+            <ChevronLeft size={24} />
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+              <span className="text-xl">🍗</span>
             </div>
-
-            <div className="phone-frame relative w-[340px] h-[700px] bg-slate-900 rounded-[3rem] border-[10px] border-slate-800 shadow-[0_0_80px_rgba(16,185,129,0.15)] overflow-hidden flex flex-col rotate-y-12 transition-all duration-700 hover:rotate-0 hover:scale-[1.02]">
-              <div className="h-12 bg-slate-900 w-full flex justify-center items-center relative z-20">
-                <div className="w-32 h-6 bg-slate-950 rounded-full absolute top-2"></div>
-              </div>
-              <div className="bg-slate-800 px-4 py-3 border-b border-slate-700 flex items-center gap-3 shrink-0 z-10">
-                <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center p-1 overflow-hidden">
-                  <img src="https://api.dicebear.com/7.x/shapes/svg?seed=resto" alt="Logo" className="w-full h-full rounded-full bg-white object-cover" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-white flex items-center gap-1">Burger House Oficial <span className="text-emerald-400 text-xs">✓</span></h3>
-                  <p className="text-xs text-slate-400">Cuenta de Empresa</p>
-                </div>
-              </div>
-
-              <div className="flex-1 bg-[#0b141a] p-4 relative flex flex-col gap-3 overflow-hidden z-0">
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')"}}></div>
-                <div className="self-end bg-[#005c4b] text-white rounded-2xl rounded-tr-none px-4 py-2 max-w-[85%] text-sm shadow">Hola, quiero ver el menú 🍔</div>
-                <div className="self-start bg-[#202c33] text-slate-200 rounded-2xl rounded-tl-none p-1 max-w-[90%] shadow border border-slate-700">
-                  <div className="px-3 py-2 text-sm">¡Hola! Bienvenido a Burger House. Haz tu pedido aquí 👇</div>
-                  <div className="border-t border-slate-700/50 mt-1"></div>
-                  <div className="px-3 py-2.5 text-center text-sky-400 font-semibold text-sm flex justify-center items-center gap-2 cursor-pointer hover:bg-slate-700/50 transition-colors" onClick={() => setFlowStep('catalog')}>
-                    <SquareMenu className="w-4 h-4" /> Abrir Menú Interactivo
-                  </div>
-                </div>
-
-                {flowStep !== 'chat' && (
-                  <div className="flow-sheet-enter absolute bottom-0 left-0 right-0 bg-[#111b21] rounded-t-3xl border-t border-slate-700 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-30 flex flex-col h-[90%]">
-                    <div className="w-12 h-1.5 bg-slate-600 rounded-full mx-auto mt-3 mb-2"></div>
-                    {flowStep === 'catalog' && (
-                      <>
-                        <div className="px-5 py-2 flex justify-between items-center border-b border-slate-800">
-                          <h4 className="font-bold text-lg text-white">Menú Digital</h4>
-                          <X className="w-5 h-5 text-slate-400 cursor-pointer" onClick={() => setFlowStep('chat')} />
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
-                          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-3 flex gap-3 items-center">
-                            <div className="w-20 h-20 bg-slate-700 rounded-xl shrink-0 flex items-center justify-center"><Beef className="w-8 h-8 text-orange-400" /></div>
-                            <div className="flex-1">
-                              <h5 className="font-bold text-sm text-white">Smash Doble</h5>
-                              <div className="flex justify-between items-center mt-2">
-                                <span className="font-bold text-emerald-400 text-sm">$14.99</span>
-                                <div className="flex items-center gap-2">
-                                  {cartCount > 0 && <button onClick={() => setCartCount(c => c-1)} className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-white"><Minus className="w-3 h-3"/></button>}
-                                  {cartCount > 0 && <span className="text-sm font-bold text-white">{cartCount}</span>}
-                                  <button onClick={() => setCartCount(c => c+1)} className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-slate-900"><Plus className="w-3 h-3"/></button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-4 bg-slate-800 border-t border-slate-700 mt-auto">
-                          <button onClick={() => cartCount > 0 && setFlowStep('form')} disabled={cartCount === 0} className={`w-full font-bold py-3.5 rounded-xl text-sm flex justify-between items-center px-5 shadow-lg transition-all ${cartCount > 0 ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
-                            <span className={`${cartCount > 0 ? 'bg-white/20' : 'bg-slate-800'} px-2 py-0.5 rounded text-xs`}>{cartCount} items</span>
-                            Pagar e Inscribirse
-                          </button>
-                        </div>
-                      </>
-                    )}
-                    {flowStep === 'form' && (
-                      <div className="flex-1 flex flex-col overflow-hidden">
-                        <div className="px-5 py-2 flex items-center gap-3 border-b border-slate-800"><button onClick={() => setFlowStep('catalog')} className="text-slate-400 p-1"><ArrowLeft className="w-5 h-5" /></button><h4 className="font-bold text-lg text-white">Tus Datos</h4></div>
-                        <form onSubmit={handleFormSubmit} className="flex-1 p-5 space-y-4 overflow-y-auto scrollbar-hide">
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Restaurante</label>
-                            <input type="text" required value={restaurantName} onChange={(e) => setRestaurantName(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none text-sm" placeholder="Nombre local" />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">WhatsApp</label>
-                            <input type="tel" required value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none text-sm" placeholder="+1 234..." />
-                          </div>
-                          <div className="pt-4"><button type="submit" disabled={isSubmitting} className="w-full bg-emerald-500 text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 text-sm">{isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirmar Pedido'}</button></div>
-                        </form>
-                      </div>
-                    )}
-                    {flowStep === 'success' && (
-                      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in-95">
-                        <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mb-6"><Check className="w-8 h-8 text-slate-900 font-bold" strokeWidth={3} /></div>
-                        <h3 className="text-xl font-extrabold mb-2 text-white">¡Registrado!</h3>
-                        <p className="text-slate-400 text-xs mb-8">Tus datos están en la base de datos.</p>
-                        <button onClick={resetFlow} className="text-emerald-400 font-semibold text-xs border border-emerald-500/30 px-6 py-2 rounded-full">Finalizar</button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      {/* Leads Real-time Dashboard */}
-      <section className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
-        <div className="feature-card p-8 border-emerald-500/20 bg-emerald-500/5">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400"><Database className="w-6 h-6"/></div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Leads Capturados (Base de Datos)</h2>
-              <p className="text-sm text-slate-400">Visualización en tiempo real de los datos guardados por el backend.</p>
+              <h1 className="font-semibold leading-tight">El Buen Sabor</h1>
+              <p className="text-xs text-green-100">Cuenta de empresa</p>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-700 text-[10px] uppercase font-bold text-slate-500 tracking-widest">
-                  <th className="py-4 px-4">Restaurante</th>
-                  <th className="py-4 px-4">WhatsApp</th>
-                  <th className="py-4 px-4">Interés</th>
-                  <th className="py-4 px-4 text-right">Fecha</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {leads.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" className="py-12 text-center text-slate-500 italic">No hay leads registrados aún. ¡Usa el móvil de arriba!</td>
-                  </tr>
-                ) : (
-                  leads.map((lead) => (
-                    <tr key={lead.id} className="border-b border-slate-800/50 hover:bg-white/5 transition-colors group">
-                      <td className="py-4 px-4 text-white font-medium">{lead.restaurant_name}</td>
-                      <td className="py-4 px-4 text-slate-400 font-mono text-xs">{lead.whatsapp}</td>
-                      <td className="py-4 px-4">
-                        <span className="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded-md font-bold border border-blue-500/20">{lead.pain_point}</span>
-                      </td>
-                      <td className="py-4 px-4 text-right text-slate-500 text-xs">
-                        {new Date(lead.created_at).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+          <div className="flex-1 overflow-y-auto bg-[#efeae2] p-4 relative" style={{ backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")', backgroundSize: 'cover', opacity: 0.9 }}>
+            <div className="space-y-4">
+              {chatMessages.map((msg) => (
+                <div key={msg.id} className={`flex ${msg.sender === 'customer' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] rounded-lg p-2 shadow-sm relative ${msg.sender === 'customer' ? 'bg-[#d9fdd3]' : 'bg-white'}`}>
+                    <div className="text-[14.5px] text-[#111b21] whitespace-pre-wrap leading-snug">
+                      {msg.text}
+                    </div>
+                    {msg.hasFlowButton && !isFlowOpen && (
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <button 
+                          onClick={handleOpenFlow}
+                          className="w-full py-2 text-center text-[#00a884] font-bold flex items-center justify-center gap-2 hover:bg-gray-50 rounded"
+                        >
+                          <ShoppingBag size={18} />
+                          Hacer Pedido
+                        </button>
+                      </div>
+                    )}
+                    <div className="text-[10px] text-[#667781] text-right mt-1 ml-4 float-right">
+                      {msg.time}
+                      {msg.sender === 'customer' && <span className="ml-1 text-[#53bdeb]">✓✓</span>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div ref={chatEndRef} />
+            </div>
           </div>
-        </div>
-      </section>
 
-      <section className="max-w-7xl mx-auto px-6 pb-24 relative z-10 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="feature-card p-6"><Smartphone className="text-emerald-400 mb-4"/><h3 className="font-bold text-sm text-white">WhatsApp Flows</h3><p className="text-xs text-slate-400">Interacción visual sin salir del chat.</p></div>
-          <div className="feature-card p-6"><MonitorPlay className="text-orange-400 mb-4"/><h3 className="font-bold text-sm text-white">KDS Directo</h3><p className="text-xs text-slate-400">Órdenes a la cocina al instante.</p></div>
-          <div className="feature-card p-6"><MapPin className="text-blue-400 mb-4"/><h3 className="font-bold text-sm text-white">Auto-Logística</h3><p className="text-xs text-slate-400">GPS para repartidores.</p></div>
-          <div className="feature-card p-6"><Users className="text-purple-400 mb-4"/><h3 className="font-bold text-sm text-white">CRM Avanzado</h3><p className="text-xs text-slate-400">Datos para vender más.</p></div>
-      </section>
+          {isFlowOpen && (
+            <div className="absolute inset-0 z-50 bg-black/50 flex flex-col justify-end animate-in fade-in duration-200">
+              <div className="bg-white h-[92%] w-full rounded-t-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-full duration-300">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white shrink-0">
+                  <div className="flex items-center gap-2 text-[#111b21] font-semibold text-lg">
+                    <button onClick={handleCloseFlow} className="p-1 hover:bg-gray-100 rounded-full text-[#54656f]">
+                      <X size={24} />
+                    </button>
+                    Pedido - El Buen Sabor
+                  </div>
+                </div>
+                
+                <div className="flex-1 overflow-hidden bg-[#f0f2f5] relative">
+                  {flowStep === 1 && renderFlowStep1()}
+                  {flowStep === 2 && renderFlowStep2()}
+                  {flowStep === 3 && renderFlowStep3()}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
