@@ -9,10 +9,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # No exponemos el puerto 5432 al exterior por seguridad
 
   backend:
     build: ./backend
@@ -26,13 +25,14 @@ services:
       - db
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=${VITE_API_URL}
     container_name: flowmatic_frontend
     restart: always
     ports:
-      - "5173:5173"
-    environment:
-      VITE_API_URL: ${VITE_API_URL}
+      - "80:80" # Cambiamos al puerto 80 para producción
     depends_on:
       - backend
 
