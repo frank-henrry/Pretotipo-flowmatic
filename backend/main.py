@@ -11,8 +11,6 @@ from typing import List, Dict, Optional
 # Database Setup
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://flowmatic:flowmatic123@db:5432/flowmatic_db")
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 # Database Model
@@ -52,6 +50,21 @@ class LeadCreate(BaseModel):
 
 # FastAPI App
 app = FastAPI()
+
+def init_db():
+    import time
+    max_retries = 5
+    for i in range(max_retries):
+        try:
+            engine = create_engine(DATABASE_URL)
+            Base.metadata.create_all(bind=engine)
+            return engine, sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        except Exception as e:
+            print(f"Error conectando a la base de datos (intento {i+1}/{max_retries}): {e}")
+            time.sleep(5)
+    raise Exception("No se pudo conectar a la base de datos tras varios intentos")
+
+engine, SessionLocal = init_db()
 
 app.add_middleware(
     CORSMiddleware,
