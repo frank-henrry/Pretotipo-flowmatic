@@ -4,6 +4,7 @@ import {
 } from './features/simulator/components/WhatsAppMockup';
 import { FlowOverlay } from './features/simulator/components/FlowOverlay';
 import { FakeDoorModal } from './features/pretotype/FakeDoorModal';
+import { AdminPanel, AdminLogin } from './features/admin/AdminPanel';
 import {
   Rocket, ArrowRight, ChevronRight,
   Smartphone, BarChart3, Truck, Users,
@@ -248,37 +249,6 @@ function FeaturesSection() {
   );
 }
 
-function TestimonialsSection() {
-  return (
-    <section id="testimonials" className="py-16 lg:py-24 border-t border-white/5">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-2">
-            Lo que dicen nuestros clientes
-          </h2>
-          <p className="text-slate-400 text-sm">Restaurantes reales, resultados reales.</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {TESTIMONIALS.map((t, i) => (
-            <div key={i} className="glass-dark rounded-2xl p-5">
-              <div className="flex gap-0.5 mb-3">
-                {Array.from({ length: t.stars }).map((_, si) => (
-                  <Star key={si} size={14} className="fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-              <p className="text-sm text-slate-300 leading-relaxed mb-4">"{t.text}"</p>
-              <div>
-                <div className="font-bold text-sm text-white">{t.name}</div>
-                <div className="text-xs text-slate-500">{t.role}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function CtaSection({ onCTA }: { onCTA: () => void }) {
   return (
@@ -331,6 +301,8 @@ function Footer() {
 
 export default function App() {
   const [isFakeDoorOpen, setIsFakeDoorOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdminRoute = window.location.pathname === '/admin';
   const openCTA = () => setIsFakeDoorOpen(true);
 
   // Always start at top on page load, regardless of browser scroll restoration
@@ -341,13 +313,18 @@ export default function App() {
     window.scrollTo(0, 0);
   }, []);
 
+  // Admin route
+  if (isAdminRoute) {
+    if (!isAdmin) return <AdminLogin onLogin={() => setIsAdmin(true)} />;
+    return <AdminPanel onLogout={() => setIsAdmin(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#080c14] text-white selection:bg-emerald-500/30">
       <Navbar onCTA={openCTA} />
       <HeroSection onCTA={openCTA} />
       <StatsBar />
       <FeaturesSection />
-      <TestimonialsSection />
       <CtaSection onCTA={openCTA} />
       <Footer />
       <FakeDoorModal isOpen={isFakeDoorOpen} onClose={() => setIsFakeDoorOpen(false)} />

@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, JSON, Float
 from sqlalchemy.ext.declarative import declarative_base
@@ -10,10 +10,11 @@ from typing import List, Dict, Optional
 
 # Database Setup
 DATABASE_URL = os.getenv("DATABASE_URL")
+ADMIN_SECRET = os.getenv("ADMIN_SECRET", "flowmatic-admin-2026")
 
 Base = declarative_base()
 
-# Database Model
+# ── Models ─────────────────────────────────────────────────────────────────
 class Order(Base):
     __tablename__ = "orders"
     id = Column(Integer, primary_key=True, index=True)
@@ -24,15 +25,18 @@ class Order(Base):
     delivery_method = Column(String, default="delivery")
     items = Column(JSON)
     total = Column(Float)
-    created_at = Column(String) # For simplicity
+    created_at = Column(String)
 
 class Lead(Base):
     __tablename__ = "leads"
     id = Column(Integer, primary_key=True, index=True)
-    contact = Column(String)
-    created_at = Column(String) # For simplicity using String
+    name = Column(String)
+    email = Column(String)
+    phone = Column(String)
+    restaurant_type = Column(String, nullable=True)
+    created_at = Column(String)
 
-# Pydantic Schemas
+# ── Schemas ────────────────────────────────────────────────────────────────
 class OrderCreate(BaseModel):
     name: str
     address: str
@@ -44,10 +48,13 @@ class OrderCreate(BaseModel):
     total: float
 
 class LeadCreate(BaseModel):
-    contact: str
+    name: str
+    email: str
+    phone: str
+    restaurant_type: Optional[str] = None
 
-# FastAPI App
-app = FastAPI()
+# ── App ────────────────────────────────────────────────────────────────────
+app = FastAPI(title="FoodFlow API", version="2.0")
 
 def init_db():
     import time
@@ -79,6 +86,15 @@ def get_db():
     finally:
         db.close()
 
+def verify_admin(x_admin_secret: Optional[str] = Header(None)):
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="No autorizado")
+
+# ── Endpoints ──────────────────────────────────────────────────────────────
+@app.get("/")
+def read_root():
+    return {"message": "FoodFlow API v2.0 is running ✅"}
+
 @app.post("/orders")
 def create_order(order: OrderCreate, db: Session = Depends(get_db)):
     db_order = Order(
@@ -99,7 +115,10 @@ def create_order(order: OrderCreate, db: Session = Depends(get_db)):
 @app.post("/leads")
 def create_lead(lead: LeadCreate, db: Session = Depends(get_db)):
     db_lead = Lead(
-        contact=lead.contact,
+        name=lead.name,
+        email=lead.email,
+        phone=lead.phone,
+        restaurant_type=lead.restaurant_type,
         created_at=datetime.now().isoformat()
     )
     db.add(db_lead)
@@ -107,10 +126,31 @@ def create_lead(lead: LeadCreate, db: Session = Depends(get_db)):
     db.refresh(db_lead)
     return {"status": "success", "lead_id": db_lead.id}
 
-@app.get("/orders")
-def get_orders(db: Session = Depends(get_db)):
-    return db.query(Order).all()
+# ── Admin endpoints (require secret header) ────────────────────────────────
+@app.get("/admin/leads", dependencies=[Depends(verify_admin)])
+def get_leads(db: Session = Depends(get_db)):
+    leads = db.query(Lead).order_by(Lead.id.desc()).all()
+    return [
+        {
+            "id": l.id,
+            "name": l.name,
+            "email": l.email,
+            "phone": l.phone,
+            "restaurant_type": l.restaurant_type,
+            "created_at": l.created_at,
+        }
+        for l in leads
+    ]
 
-@app.get("/")
-def read_root():
-    return {"message": "Flowmatic API is running"}
+@app.get("/admin/orders", dependencies=[Depends(verify_admin)])
+def get_orders(db: Session = Depends(get_db)):
+    return db.query(Order).order_by(Order.id.desc()).all()
+
+@app.get("/admin/stats", dependencies=[Depends(verify_admin)])
+def get_stats(db: Session = Depends(get_db)):
+    total_leads = db.query(Lead).count()
+    total_orders = db.query(Order).count()
+    return {
+        "total_leads": total_leads,
+        "total_orders": total_orders,
+    }
