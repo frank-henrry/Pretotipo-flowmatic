@@ -14,7 +14,7 @@ export const FakeDoorModal: React.FC<FakeDoorModalProps> = ({ isOpen, onClose })
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (leadContact.trim().length > 5) {
       createLeadMutation.mutate({ contact: leadContact }, {
