@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Users, TrendingUp, Mail, Phone, Store, RefreshCw, Lock, LogOut } from 'lucide-react';
-import { useAdminLeads, useAdminStats } from '../../services/api';
+import { useAdminLeads, useAdminStats, type AdminLead, type AdminStats } from '../../services/api';
 
 interface AdminPanelProps {
   onLogout: () => void;

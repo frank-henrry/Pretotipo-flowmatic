@@ -61,7 +61,13 @@ def init_db():
     max_retries = 5
     for i in range(max_retries):
         try:
-            engine = create_engine(DATABASE_URL)
+            engine = create_engine(
+                DATABASE_URL,
+                pool_pre_ping=True,       # Test connection before using (auto-reconnect)
+                pool_recycle=300,          # Recycle connections every 5 min
+                pool_size=5,
+                max_overflow=10,
+            )
             Base.metadata.create_all(bind=engine)
             return engine, sessionmaker(autocommit=False, autoflush=False, bind=engine)
         except Exception as e:

@@ -10,6 +10,15 @@ export default defineConfig({
     allowedHosts: [
       'plazatecstore.com',
       '.plazatecstore.com'
-    ]
-  }
+    ],
+    // Proxy para desarrollo local SIN Docker (npm run dev directo)
+    // En Docker, el Nginx del contenedor ya hace este proxy internamente.
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8010',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 })
