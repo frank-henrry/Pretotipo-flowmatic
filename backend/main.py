@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional
 
 # Database Setup
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://flowmatic:flowmatic123@db:5432/flowmatic_db")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 Base = declarative_base()
 
@@ -31,8 +31,6 @@ class Lead(Base):
     id = Column(Integer, primary_key=True, index=True)
     contact = Column(String)
     created_at = Column(String) # For simplicity using String
-
-Base.metadata.create_all(bind=engine)
 
 # Pydantic Schemas
 class OrderCreate(BaseModel):
