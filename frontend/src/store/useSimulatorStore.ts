@@ -8,6 +8,14 @@ interface OrderItem {
   customizable: boolean;
 }
 
+interface ChatMessage {
+  id: number;
+  sender: 'business' | 'customer';
+  time: string;
+  text: string;
+  hasFlowButton?: boolean;
+}
+
 interface Customization {
   guarnicion: string;
   cremas: string[];
@@ -16,7 +24,7 @@ interface Customization {
 interface SimulatorState {
   isFlowOpen: boolean;
   flowStep: number;
-  chatMessages: any[];
+  chatMessages: ChatMessage[];
   formData: {
     selectedItems: string[];
     customizations: Record<string, Customization>;
