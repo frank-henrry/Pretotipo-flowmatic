@@ -22,7 +22,7 @@ services:
     container_name: flowmatic_backend
     restart: always
     ports:
-      - "8010:8000"
+      - "8010:8000" # Mapeamos puerto 8010 externo al 8000 interno
     environment:
       DATABASE_URL: ${DATABASE_URL}
     depends_on:
@@ -37,10 +37,7 @@ services:
     container_name: flowmatic_frontend
     restart: always
     ports:
-      - "80:80"
-      - "127.0.0.1:5173:5173"
-    environment:
-      VITE_API_URL: ${VITE_API_URL}
+      - "127.0.0.1:5173:80" # Mapeamos puerto 5173 externo al 80 interno (Nginx)
     depends_on:
       - backend
 
