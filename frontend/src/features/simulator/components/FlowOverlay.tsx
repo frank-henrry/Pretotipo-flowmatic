@@ -42,13 +42,14 @@ export const FlowOverlay: React.FC = () => {
     
     const orderItems = formData.selectedItems.map(id => {
       const item = MENU_ITEMS.find(i => i.id === id);
+      if (!item) return '';
       let text = `*${item.name}*`;
       if (item.customizable && formData.customizations[id]) {
         const cust = formData.customizations[id];
         text += `\n  ↳ _Opción:_ ${cust.guarnicion}`;
       }
       return text;
-    }).join('\n\n');
+    }).filter(Boolean).join('\n\n');
 
     addChatMessage({
       id: Date.now(),
