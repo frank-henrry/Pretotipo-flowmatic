@@ -1,0 +1,121 @@
+--progress is a global compose flag, better use `docker compose --progress xx build ...
+time="2026-04-30T12:03:31-05:00" level=warning msg="/home/frank/Proyect-pretotipo/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image proyect-pretotipo-frontend Building 
+ Image proyect-pretotipo-backend Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.00kB done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.21kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:20-alpine
+#3 DONE 0.2s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [deps 1/4] FROM docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8
+#5 resolve docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8 0.0s done
+#5 DONE 0.0s
+
+#6 [runner 3/7] RUN addgroup --system --gid 1001 nodejs
+#6 CACHED
+
+#7 [deps 2/4] WORKDIR /app
+#7 CACHED
+
+#8 [runner 4/7] RUN adduser --system --uid 1001 nextjs
+#8 CACHED
+
+#9 [internal] load build context
+#9 transferring context: 1.91kB done
+#9 DONE 0.0s
+
+#10 [deps 4/4] RUN npm ci --legacy-peer-deps
+#10 CACHED
+
+#11 [deps 3/4] COPY package*.json ./
+#11 CACHED
+
+#12 [builder 3/5] COPY --from=deps /app/node_modules ./node_modules
+#12 CACHED
+
+#13 [builder 4/5] COPY . .
+#13 CACHED
+
+#14 [builder 5/5] RUN npm run build
+#14 0.495 
+#14 0.495 > foodflow-landing@0.1.0 build
+#14 0.495 > next build
+#14 0.495 
+#14 0.998 ▲ Next.js 16.2.4 (Turbopack)
+#14 0.999 
+#14 1.025   Creating an optimized production build ...
+#14 2.032 (node:46) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///app/postcss.config.js is not specified and it doesn't parse as CommonJS.
+#14 2.032 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+#14 2.032 To eliminate this warning, add "type": "module" to /app/package.json.
+#14 2.032 (Use `node --trace-warnings ...` to show where the warning was created)
+#14 3.590 
+#14 3.590 > Build error occurred
+#14 3.595 Error: Turbopack build failed with 1 errors:
+#14 3.595 ./src/app/globals.css
+#14 3.595 Error evaluating Node.js code
+#14 3.595 Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+#14 3.595     [at ft (/app/node_modules/tailwindcss/dist/lib.js:38:1643)]
+#14 3.595     at pluginFactory (turbopack:///[turbopack-node]/transforms/postcss.ts:56:14) [/app/.next/build/chunks/[root-of-the-server]__0iv9ksq._.js:165:20]
+#14 3.595     [at <anonymous>]
+#14 3.595     at map (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33) [/app/.next/build/chunks/[root-of-the-server]__0iv9ksq._.js:155:35]
+#14 3.595     at init (turbopack:///[turbopack-node]/child_process/evaluate.ts:74:20) [/app/.next/build/chunks/[root-of-the-server]__0rua-~2._.js:429:26]
+#14 3.595 
+#14 3.595 Import trace:
+#14 3.595   Client Component Browser:
+#14 3.595     ./src/app/globals.css [Client Component Browser]
+#14 3.595     ./src/app/layout.tsx [Server Component]
+#14 3.595 
+#14 3.595 
+#14 3.595     at pluginFactory (turbopack:///[turbopack-node]/transforms/postcss.ts:56:14) [/app/.next/build/chunks/[root-of-the-server]__0iv9ksq._.js:165:20])
+#14 3.595     at map (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33) [/app/.next/build/chunks/[root-of-the-server]__0iv9ksq._.js:155:35])
+#14 3.595     at init (turbopack:///[turbopack-node]/child_process/evaluate.ts:74:20) [/app/.next/build/chunks/[root-of-the-server]__0rua-~2._.js:429:26])
+#14 3.636 npm notice
+#14 3.636 npm notice New major version of npm available! 10.8.2 -> 11.13.0
+#14 3.636 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.13.0
+#14 3.636 npm notice To update run: npm install -g npm@11.13.0
+#14 3.636 npm notice
+#14 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+------
+ > [builder 5/5] RUN npm run build:
+3.595 
+3.595 
+3.595     at pluginFactory (turbopack:///[turbopack-node]/transforms/postcss.ts:56:14) [/app/.next/build/chunks/[root-of-the-server]__0iv9ksq._.js:165:20])
+3.595     at map (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33) [/app/.next/build/chunks/[root-of-the-server]__0iv9ksq._.js:155:35])
+3.595     at init (turbopack:///[turbopack-node]/child_process/evaluate.ts:74:20) [/app/.next/build/chunks/[root-of-the-server]__0rua-~2._.js:429:26])
+3.636 npm notice
+3.636 npm notice New major version of npm available! 10.8.2 -> 11.13.0
+3.636 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.13.0
+3.636 npm notice To update run: npm install -g npm@11.13.0
+3.636 npm notice
+------
+Dockerfile:16
+
+--------------------
+
+  14 |     ENV NODE_ENV=production
+
+  15 |     
+
+  16 | >>> RUN npm run build
+
+  17 |     
+
+  18 |     # ─── Etapa 3: Servidor de producción (standalone) ────────────────
+
+--------------------
+
+failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+

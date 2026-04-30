@@ -1,0 +1,77 @@
+--progress is a global compose flag, better use `docker compose --progress xx build ...
+time="2026-04-30T12:09:05-05:00" level=warning msg="/home/frank/Proyect-pretotipo/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image proyect-pretotipo-backend Building 
+ Image proyect-pretotipo-frontend Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.00kB done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.21kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:20-alpine
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [deps 1/4] FROM docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8
+#6 resolve docker.io/library/node:20-alpine@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8 0.0s done
+#6 DONE 0.0s
+
+#7 [runner 3/7] RUN addgroup --system --gid 1001 nodejs
+#7 CACHED
+
+#8 [deps 2/4] WORKDIR /app
+#8 CACHED
+
+#9 [runner 4/7] RUN adduser --system --uid 1001 nextjs
+#9 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 1.84kB done
+#5 DONE 0.0s
+
+#10 [deps 4/4] RUN npm ci --legacy-peer-deps
+#10 CACHED
+
+#11 [builder 4/5] COPY . .
+#11 CACHED
+
+#12 [builder 3/5] COPY --from=deps /app/node_modules ./node_modules
+#12 CACHED
+
+#13 [deps 3/4] COPY package*.json ./
+#13 CACHED
+
+#14 [builder 5/5] RUN npm run build
+#14 CACHED
+
+#15 [runner 5/7] COPY --from=builder /app/public ./public
+#15 ERROR: failed to calculate checksum of ref ymkwz6otj2vmta34062gtf7zz::773fuhbqx539pegtgur7yu06x: "/app/public": not found
+------
+ > [runner 5/7] COPY --from=builder /app/public ./public:
+------
+Dockerfile:29
+
+--------------------
+
+  27 |     
+
+  28 |     # Copiar artefactos del build standalone
+
+  29 | >>> COPY --from=builder /app/public ./public
+
+  30 |     COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+
+  31 |     COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+--------------------
+
+failed to solve: failed to compute cache key: failed to calculate checksum of ref ymkwz6otj2vmta34062gtf7zz::773fuhbqx539pegtgur7yu06x: "/app/public": not found
+

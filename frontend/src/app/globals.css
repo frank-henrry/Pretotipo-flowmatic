@@ -1,0 +1,155 @@
+/* src/app/globals.css */
+@import "tailwindcss";
+@source "../**/*.{ts,tsx,js,jsx}";
+
+/* ─── Dark mode (Tailwind v4 — sintaxis correcta) ────────── */
+@variant dark (&:where(.dark, .dark *));
+
+/* ─── Theme tokens ───────────────────────────────────────── */
+@theme {
+  --font-display: "Syne", sans-serif;
+  --font-body: "DM Sans", sans-serif;
+
+  --color-green: var(--green);
+  --color-green-dim: var(--green-dim);
+  --color-green-glow: var(--green-glow);
+  --color-cyan: var(--cyan);
+  --color-cyan-dim: var(--cyan-dim);
+
+  --color-bg: var(--background);
+  --color-bg-surface: var(--surface);
+  --color-bg-surface2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --shadow-green-sm: 0 0 16px var(--green-glow);
+  --shadow-green-md: 0 0 40px var(--green-glow);
+  --shadow-cyan-sm: 0 0 16px var(--cyan-dim);
+
+  --animate-scroll-x: scrollX 28s linear infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4,0,0.6,1) infinite;
+  --animate-fade-up: fadeUp 0.6s ease forwards;
+  --animate-glow-pulse: glowPulse 3s ease-in-out infinite;
+
+  @keyframes scrollX {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes fadeUp {
+    0%   { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 0.9; }
+  }
+}
+
+/* ─── Brand colors + Light mode ─────────────────────────── */
+:root {
+  --green: #22c55e;
+  --green-hover: #16a34a;
+  --green-dim: rgba(34, 197, 94, 0.12);
+  --green-glow: rgba(34, 197, 94, 0.22);
+  --cyan: #06b6d4;
+  --cyan-hover: #0891b2;
+  --cyan-dim: rgba(6, 182, 212, 0.12);
+
+  --background: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f4f4f5;
+  --surface-3: #ececec;
+  --border: #e4e4e7;
+  --border-subtle: #f0f0f0;
+  --text-primary: #09090b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+}
+
+/* ─── Dark mode variables ────────────────────────────────── */
+.dark {
+  --background: #080808;
+  --surface: #111111;
+  --surface-2: #191919;
+  --surface-3: #222222;
+  --border: #282828;
+  --border-subtle: #1e1e1e;
+  --text-primary: #f0f0f0;
+  --text-secondary: #888888;
+  --text-muted: #4a4a4a;
+}
+
+
+
+/* ─── Base ───────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--background);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+/* ─── Selection ──────────────────────────────────────────── */
+::selection { background: var(--green-dim); color: var(--green); }
+
+/* ─── Utilidades globales ────────────────────────────────── */
+.font-display { font-family: var(--font-display); }
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, var(--green) 0%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-green {
+  background: linear-gradient(90deg, var(--green) 0%, #86efac 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Card glow border ───────────────────────────────────── */
+.card-glow { position: relative; }
+.card-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--green-glow), var(--cyan-dim));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.card-glow:hover::before { opacity: 1; }
+
+/* ─── Noise overlay ──────────────────────────────────────── */
+.noise-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.3;
+  border-radius: inherit;
+}

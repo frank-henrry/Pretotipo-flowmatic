@@ -21,9 +21,8 @@ services:
     build: ./backend
     container_name: flowmatic_backend
     restart: always
-    # Puerto solo accesible internamente a través del Nginx del frontend
-    expose:
-      - "8000"
+    ports:
+      - "8010:8000" # Mapeamos puerto 8010 externo al 8000 interno
     environment:
       DATABASE_URL: ${DATABASE_URL}
     depends_on:
@@ -38,7 +37,7 @@ services:
     container_name: flowmatic_frontend
     restart: always
     ports:
-      - "127.0.0.1:5173:80"
+      - "5173:80" # Mapeamos puerto 5173 externo al 80 interno (Nginx)
     depends_on:
       - backend
 
