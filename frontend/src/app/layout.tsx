@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Syne, DM_Sans } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 const syne = Syne({
@@ -95,6 +96,8 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
+        {/* Reemplaza G-XXXXXXXXXX con tu ID real de Google Analytics */}
+        <GoogleAnalytics gaId="G-8MKZQ5J1JR" />
       </body>
     </html>
   );

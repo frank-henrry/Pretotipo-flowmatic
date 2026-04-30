@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { sendGAEvent } from '@next/third-parties/google';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, CheckCircle, MessageSquare, Utensils, Phone, Mail, User } from 'lucide-react';
 import { createLead } from '../../lib/api';
@@ -29,6 +30,12 @@ export function FakeDoorModal({ isOpen, onClose }: FakeDoorModalProps) {
     try {
       await createLead(formData);
       setStep('success');
+      
+      // Tracking conversion in Google Analytics
+      sendGAEvent('event', 'lead_captured', {
+        restaurant_type: formData.restaurant_type,
+        value: 1
+      });
     } catch (err) {
       console.error(err);
       setError('Hubo un error al procesar tu solicitud. Por favor intenta de nuevo.');
