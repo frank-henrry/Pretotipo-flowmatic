@@ -33,13 +33,13 @@ export function Footer() {
             <div className="flex items-center gap-2.5 mb-4">
             <Image
               src="/logo-saas.png"
-              alt="FoodFlow logo"
+              alt="GenViaYA logo"
               width={32}
               height={32}
               className="w-8 h-8 object-contain"
             />
               <span className="font-display font-bold text-[var(--text-primary)] text-[17px]">
-                FoodFlow
+                GenViaYA
               </span>
             </div>
             <p className="text-sm font-body text-[var(--text-secondary)] leading-relaxed max-w-[220px]">
@@ -79,7 +79,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs font-body text-[var(--text-muted)]">
-            © {new Date().getFullYear()} FoodFlow. Todos los derechos reservados.
+            © {new Date().getFullYear()} GenViaYA. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[var(--green)] animate-pulse" />

@@ -43,7 +43,7 @@ export const testimonials: Testimonial[] = [
     role: "Fundador",
     restaurant: "Burger Lab",
     city: "Cusco",
-    text: "Pensé que era complicado pero la configuración inicial tomó menos de un día. El equipo de FoodFlow estuvo con nosotros en todo momento. Ahora no imagino el restaurante sin esto.",
+    text: "Pensé que era complicado pero la configuración inicial tomó menos de un día. El equipo de GenViaYA estuvo con nosotros en todo momento. Ahora no imagino el restaurante sin esto.",
     initials: "RM",
     accentColor: "cyan",
   },

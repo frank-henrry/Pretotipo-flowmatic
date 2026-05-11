@@ -38,7 +38,7 @@ export function Features() {
           <span className="text-gradient-brand">en un solo lugar</span>
         </h2>
         <p className="text-base font-body text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed">
-          Desde el primer mensaje hasta la entrega. FoodFlow cubre cada paso
+          Desde el primer mensaje hasta la entrega. GenViaYA cubre cada paso
           del proceso sin que tú tengas que estar pendiente.
         </p>
       </AnimatedSection>

@@ -24,7 +24,7 @@ export function Testimonials() {
           <span className="text-gradient-brand">restaurantes</span>
         </h2>
         <p className="text-base font-body text-[var(--text-secondary)] max-w-md mx-auto">
-          Restaurantes reales que transformaron su operación con FoodFlow.
+          Restaurantes reales que transformaron su operación con GenViaYA.
         </p>
       </AnimatedSection>
 

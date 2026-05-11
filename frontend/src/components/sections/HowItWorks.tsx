@@ -52,7 +52,7 @@ export function HowItWorks() {
           </h2>
           <p className="text-base font-body text-[var(--text-secondary)] max-w-lg mx-auto">
             No necesitas saber de tecnología. Si puedes usar WhatsApp,
-            puedes usar FoodFlow.
+            puedes usar GenViaYA.
           </p>
         </AnimatedSection>
 

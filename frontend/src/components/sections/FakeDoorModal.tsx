@@ -169,7 +169,7 @@ export function FakeDoorModal({ isOpen, onClose }: FakeDoorModalProps) {
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-3">¡Solicitud Enviada!</h2>
                 <p className="text-gray-400 mb-8">
-                  Gracias por tu interés en FoodFlow. Uno de nuestros asesores te contactará vía WhatsApp para activar tu demo gratuita.
+                  Gracias por tu interés en GenViaYA. Uno de nuestros asesores te contactará vía WhatsApp para activar tu demo gratuita.
                 </p>
                 <button
                   onClick={onClose}

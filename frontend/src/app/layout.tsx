@@ -20,9 +20,9 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "FoodFlow · Automatiza pedidos de tu restaurante por WhatsApp",
+  title: "GenViaYA · Automatiza pedidos de tu restaurante por WhatsApp",
   description:
-    "FoodFlow convierte tu WhatsApp Business en un sistema de pedidos, CRM y logística. Menú interactivo, despacho inteligente y gestión de mesas en un solo panel.",
+    "GenViaYA convierte tu WhatsApp Business en un sistema de pedidos, CRM y logística. Menú interactivo, despacho inteligente y gestión de mesas en un solo panel.",
   keywords: [
     "automatización restaurantes",
     "pedidos por WhatsApp",
@@ -31,31 +31,31 @@ export const metadata: Metadata = {
     "delivery automatizado",
     "WhatsApp Business restaurante",
     "software restaurantes Perú",
-    "FoodFlow",
+    "GenViaYA",
   ],
-  authors: [{ name: "FoodFlow" }],
-  creator: "FoodFlow",
-  metadataBase: new URL("https://foodflow.app"),
+  authors: [{ name: "GenViaYA" }],
+  creator: "GenViaYA",
+  metadataBase: new URL("https://genviaya.com"),
   openGraph: {
     type: "website",
     locale: "es_PE",
-    url: "https://foodflow.app",
-    title: "FoodFlow · Automatiza pedidos de tu restaurante por WhatsApp",
+    url: "https://genviaya.com",
+    title: "GenViaYA · Automatiza pedidos de tu restaurante por WhatsApp",
     description:
       "Pedidos automáticos, CRM, logística y mesas — todo desde WhatsApp. Empieza gratis 14 días.",
-    siteName: "FoodFlow",
+    siteName: "GenViaYA",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "FoodFlow — Automatización de pedidos por WhatsApp",
+        alt: "GenViaYA — Automatización de pedidos por WhatsApp",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FoodFlow · Automatiza pedidos de tu restaurante por WhatsApp",
+    title: "GenViaYA · Automatiza pedidos de tu restaurante por WhatsApp",
     description:
       "Pedidos automáticos, CRM, logística y mesas — todo desde WhatsApp.",
     images: ["/og-image.png"],

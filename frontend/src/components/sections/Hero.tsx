@@ -257,7 +257,7 @@ function PhoneMockup({ onFlowChange }: { onFlowChange: (open: boolean) => void }
             animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
             transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
           />
-          Demo en vivo — así funciona FoodFlow
+          Demo en vivo — así funciona GenViaYA
         </div>
       </motion.div>
 
@@ -627,7 +627,7 @@ export function Hero({ onOpenModal }: { onOpenModal: (e?: React.MouseEvent) => v
               transition={{ duration: 0.6, delay: 0.35 }}
               className="text-base font-body text-[var(--text-secondary)] leading-relaxed mb-9 max-w-md"
             >
-              FoodFlow convierte tu WhatsApp en un sistema de pedidos, CRM y logística. Tus clientes piden como siempre.{" "}
+              GenViaYA convierte tu WhatsApp en un sistema de pedidos, CRM y logística. Tus clientes piden como siempre.{" "}
               <span className="text-[var(--text-primary)] font-medium">Tú ganas control total.</span>
             </motion.p>
 

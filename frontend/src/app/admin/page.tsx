@@ -87,8 +87,8 @@ export default function AdminPage() {
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center mb-12">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#22c55e] rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-[#22c55e]/20">F</div>
-            <h1 className="text-xl font-bold tracking-tight">FoodFlow <span className="text-[#22c55e] text-sm ml-1 font-medium opacity-80">ADMIN</span></h1>
+            <div className="w-10 h-10 bg-[#22c55e] rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-[#22c55e]/20">G</div>
+            <h1 className="text-xl font-bold tracking-tight">GenViaYA <span className="text-[#22c55e] text-sm ml-1 font-medium opacity-80">ADMIN</span></h1>
           </div>
           <button 
             onClick={() => setIsAuthenticated(false)}
@@ -186,7 +186,7 @@ export default function AdminPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <a 
-                          href={`https://api.whatsapp.com/send?phone=${lead.phone.replace(/\D/g, '')}&text=Hola%20${encodeURIComponent(lead.name)}!%20Soy%20de%20FoodFlow.%20Vi%20que%20solicitaste%20una%20demo%20para%20tu%20negocio.`}
+                          href={`https://api.whatsapp.com/send?phone=${lead.phone.replace(/\D/g, '')}&text=Hola%20${encodeURIComponent(lead.name)}!%20Soy%20de%20GenViaYA.%20Vi%20que%20solicitaste%20una%20demo%20para%20tu%20negocio.`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 bg-[#22c55e]/10 hover:bg-[#22c55e] text-[#22c55e] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all border border-[#22c55e]/20"

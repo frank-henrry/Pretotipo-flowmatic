@@ -48,7 +48,7 @@ export function FinalCTA({ onOpenModal }: { onOpenModal: (e?: React.MouseEvent) 
 
               <p className="text-base font-body text-[var(--text-secondary)] max-w-lg mx-auto mb-10 leading-relaxed">
                 Empieza con 14 días gratis. Sin contratos, sin tarjeta de
-                crédito. Solo tú, tu restaurante y FoodFlow.
+                crédito. Solo tú, tu restaurante y GenViaYA.
               </p>
 
               {/* CTAs */}

@@ -51,18 +51,18 @@ export function Navbar({ onOpenModal }: NavbarProps) {
         <a
           href="#"
           className="flex items-center gap-2.5 group"
-          aria-label="FoodFlow inicio"
+          aria-label="GenViaYA inicio"
         >
         <Image
           src="/logo-saas.png"
-          alt="FoodFlow logo"
+          alt="GenViaYA logo"
           width={32}
           height={32}
           className="w-8 h-8 object-contain"
           priority
         />
       <span className="font-display font-bold text-[var(--text-primary)] text-[18px] tracking-[-0.03em]">
-        Food<span style={{ color: "var(--green)" }}>Flow</span>
+        GenVia<span style={{ color: "var(--green)" }}>YA</span>
       </span>
         </a>
 
