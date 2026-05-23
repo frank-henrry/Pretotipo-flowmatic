@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+ARG NEXT_PUBLIC_ADMIN_SECRET
+ENV NEXT_PUBLIC_ADMIN_SECRET=$NEXT_PUBLIC_ADMIN_SECRET
 RUN npm run build
 
 # Etapa 2: Servidor de producción (Nginx)

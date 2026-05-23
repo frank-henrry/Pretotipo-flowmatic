@@ -1,13 +1,15 @@
 import axios from 'axios';
 
 // En producción (Docker), Nginx proxea /api/* -> backend:8000
-// En desarrollo, Next.js rewrites pueden manejar esto o usar la URL directa
 const API_URL = '/api';
 
 const api = axios.create({ baseURL: API_URL });
+
 const adminApi = axios.create({
   baseURL: API_URL,
-  headers: { 'x-admin-secret': 'flowmatic-admin-2026' },
+  headers: {
+    'x-admin-secret': process.env.NEXT_PUBLIC_ADMIN_SECRET ?? '',
+  },
 });
 
 export interface LeadData {

@@ -7,19 +7,16 @@ import { Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Evitar hydration mismatch
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return (
-      <div className={cn("w-9 h-9 rounded-lg", className)} aria-hidden />
-    );
+    return <div className={cn("w-9 h-9 rounded-lg", className)} aria-hidden />;
   }
 
-  const isDark = theme === "dark";
+  const isDark = resolvedTheme === "dark";
 
   return (
     <button

@@ -14,7 +14,7 @@ export default function AdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'flowmatic-admin-2026') {
+    if (password === (process.env.NEXT_PUBLIC_ADMIN_SECRET ?? '')) {
       setIsAuthenticated(true);
       setError(null);
     } else {
