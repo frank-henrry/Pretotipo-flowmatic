@@ -4,20 +4,20 @@ import Image from "next/image";
 
 const footerLinks = {
   Producto: [
-    { label: "Funcionalidades", href: "#funcionalidades" },
-    { label: "Cómo funciona", href: "#como-funciona" },
-    { label: "Precios", href: "#planes" },
-    { label: "Demo gratuita", href: "#planes" },
+    { label: "Funcionalidades", href: "/#funcionalidades" },
+    { label: "Cómo funciona", href: "/#como-funciona" },
+    { label: "Precios", href: "/#planes" },
+    { label: "Demo gratuita", href: "/#planes" },
   ],
   Empresa: [
     { label: "Sobre nosotros", href: "#" },
     { label: "Blog", href: "#" },
-    { label: "Casos de éxito", href: "#testimonios" },
+    { label: "Casos de éxito", href: "/#testimonios" },
     { label: "Contacto", href: "#" },
   ],
   Legal: [
-    { label: "Política de privacidad", href: "#" },
-    { label: "Términos de uso", href: "#" },
+    { label: "Política de privacidad", href: "/privacidad/" },
+    { label: "Términos de uso", href: "/terminos/" },
     { label: "Cookies", href: "#" },
   ],
 };

@@ -1,0 +1,19 @@
+# Variables de entorno (secretos) — usar .env.example como plantilla
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

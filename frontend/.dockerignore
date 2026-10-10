@@ -1,0 +1,25 @@
+# Se reinstalan / regeneran dentro de la imagen
+node_modules
+.next
+out
+build
+coverage
+*.tsbuildinfo
+next-env.d.ts
+
+# Secretos: se pasan como build args desde docker-compose
+.env
+.env.*
+
+# No necesarios para construir
+Dockerfile
+.dockerignore
+.git
+.gitignore
+.agentrules
+*.log
+*.md
+.vscode
+.idea
+.DS_Store
+Thumbs.db
