@@ -23,7 +23,7 @@ export default function TerminosPage() {
         </>
       }
       intro="Las condiciones que rigen el uso de GenViaYA: naturaleza del servicio, pagos, responsabilidades y uso aceptable de la plataforma."
-      related={{ label: "Política de Privacidad", href: "/privacidad/" }}
+      related={{ label: "Eliminación de Datos", href: "/eliminacion-datos/" }}
     />
   );
 }

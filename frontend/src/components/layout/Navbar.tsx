@@ -54,7 +54,7 @@ export function Navbar({ onOpenModal }: NavbarProps) {
           aria-label="GenViaYA inicio"
         >
         <Image
-          src="/logo-saas.png"
+          src="/logo-icon.png"
           alt="GenViaYA logo"
           width={32}
           height={32}

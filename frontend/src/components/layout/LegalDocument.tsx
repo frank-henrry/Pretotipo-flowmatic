@@ -23,7 +23,7 @@ export function LegalDocument({ section, badge, title, intro, related }: LegalDo
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2.5" aria-label="GenViaYA inicio">
             <Image
-              src="/logo-saas.png"
+              src="/logo-icon.png"
               alt="GenViaYA logo"
               width={32}
               height={32}

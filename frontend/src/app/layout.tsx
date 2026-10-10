@@ -47,6 +47,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://genviaya.com",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
   openGraph: {
     type: "website",
     locale: "es_PE",
@@ -57,7 +65,7 @@ export const metadata: Metadata = {
     siteName: "GenViaYA",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "GenViaYA — Bot WhatsApp para automatizar pedidos de restaurante",
@@ -69,7 +77,7 @@ export const metadata: Metadata = {
     title: "GenViaYA · Bot WhatsApp para Restaurantes",
     description:
       "Automatiza los pedidos de tu restaurante por WhatsApp. Bot inteligente + CRM + despacho en tiempo real.",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
@@ -193,7 +201,6 @@ export default function RootLayout({
       className={`${syne.variable} ${dmSans.variable}`}
     >
       <head>
-        <link rel="icon" href="/logo-saas.png" type="image/png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSoftware) }}
