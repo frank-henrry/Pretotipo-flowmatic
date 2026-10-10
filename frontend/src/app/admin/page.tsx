@@ -57,7 +57,6 @@ export default function AdminPage() {
           </div>
           <h1 className="text-2xl font-bold text-white text-center mb-2">Panel de Control</h1>
           <p className="text-gray-400 text-center mb-8 text-sm">Ingrese su clave de acceso para continuar</p>
-          
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <input
@@ -90,7 +89,7 @@ export default function AdminPage() {
             <div className="w-10 h-10 bg-[#22c55e] rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-[#22c55e]/20">G</div>
             <h1 className="text-xl font-bold tracking-tight">GenViaYA <span className="text-[#22c55e] text-sm ml-1 font-medium opacity-80">ADMIN</span></h1>
           </div>
-          <button 
+          <button
             onClick={() => setIsAuthenticated(false)}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium"
           >
@@ -127,8 +126,8 @@ export default function AdminPage() {
         <div className="bg-[#111111] border border-[#282828] rounded-2xl overflow-hidden shadow-xl">
           <div className="p-6 border-b border-[#282828] flex justify-between items-center bg-[#141414]">
             <h2 className="font-bold text-lg">Leads Capturados</h2>
-            <button 
-              onClick={fetchData} 
+            <button
+              onClick={fetchData}
               disabled={isLoading}
               className="p-2 hover:bg-[#22c55e]/10 rounded-lg text-gray-400 hover:text-[#22c55e] transition-all disabled:opacity-50"
             >
@@ -185,7 +184,7 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <a 
+                        <a
                           href={`https://api.whatsapp.com/send?phone=${lead.phone.replace(/\D/g, '')}&text=Hola%20${encodeURIComponent(lead.name)}!%20Soy%20de%20GenViaYA.%20Vi%20que%20solicitaste%20una%20demo%20para%20tu%20negocio.`}
                           target="_blank"
                           rel="noopener noreferrer"
