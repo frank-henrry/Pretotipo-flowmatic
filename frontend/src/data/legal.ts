@@ -102,4 +102,51 @@ export const legalSections: LegalSection[] = [
       },
     ],
   },
+  {
+    id: "eliminacion",
+    number: "3",
+    title: "Eliminación de Datos",
+    clauses: [
+      {
+        id: "3.1",
+        title: "Tu Derecho a la Eliminación",
+        body: "En cumplimiento con la Ley de Protección de Datos Personales del Perú (Ley N° 29733) y su Reglamento, todo titular de datos personales puede ejercer en cualquier momento sus derechos de acceso, rectificación, cancelación y oposición (derechos ARCO). Esta página explica cómo solicitar la eliminación de la información asociada a GenViaYa, ya sea como restaurante afiliado o como consumidor final.",
+      },
+      {
+        id: "3.2",
+        title: "Solicitud por parte del Restaurante Afiliado",
+        body: "El titular o representante autorizado de la cuenta puede solicitar la eliminación de los datos de su negocio (catálogo, métricas de ventas, configuraciones operativas, historial de pedidos e información de facturación) enviando un correo a privacidad@genviaya.com desde el correo electrónico registrado en la cuenta, con el asunto \"Solicitud de eliminación de datos\" e indicando el nombre comercial del restaurante y el número de WhatsApp Business vinculado. Por seguridad, GenViaYa podrá solicitar información adicional para verificar la identidad del solicitante antes de procesar la solicitud.",
+      },
+      {
+        id: "3.3",
+        title: "Solicitud por parte del Consumidor Final",
+        body: "Los datos de los comensales (nombre, número de teléfono, dirección de entrega e historial de pedidos) pertenecen al restaurante donde se realizó el pedido, conforme a la cláusula 1.3 de nuestra Política de Privacidad. Por ello, la vía principal para solicitar su eliminación es contactar directamente al restaurante. Si no obtienes respuesta, puedes escribir a privacidad@genviaya.com indicando el número de teléfono con el que realizaste tus pedidos y el nombre del restaurante; trasladaremos la solicitud al comercio afiliado y daremos seguimiento hasta su atención.",
+      },
+      {
+        id: "3.4",
+        title: "Plazos de Atención",
+        body: "Las solicitudes de eliminación serán atendidas en un plazo máximo de diez (10) días hábiles contados desde la verificación de la identidad del solicitante, conforme al plazo establecido por el Reglamento de la Ley N° 29733. Una vez completado el proceso, el solicitante recibirá una confirmación por correo electrónico. La eliminación es definitiva y no podrá revertirse.",
+      },
+      {
+        id: "3.5",
+        title: "Información que Podemos Conservar",
+        body: "Cierta información podrá conservarse de forma bloqueada, sin uso operativo, únicamente cuando exista una obligación legal, tributaria o contable que lo exija, o cuando sea necesaria para la prevención de fraudes o la atención de procesos legales en curso. Concluido el plazo legal correspondiente, dicha información será eliminada de forma permanente.",
+      },
+      {
+        id: "3.6",
+        title: "Eliminación Automática por Cancelación de Cuenta",
+        body: "Independientemente de cualquier solicitud, cuando un restaurante cancela definitivamente su plan, su información se mantiene respaldada de forma inactiva por un máximo de noventa (90) días calendario, conforme a la cláusula 2.7 de nuestros Términos y Condiciones. Concluido ese plazo sin reactivación del servicio, todos los datos, catálogos y métricas se eliminan permanentemente de nuestros servidores.",
+      },
+      {
+        id: "3.7",
+        title: "Datos Gestionados por Meta (WhatsApp)",
+        body: "Los mensajes intercambiados a través de WhatsApp también son procesados por Meta Platforms, Inc. conforme a sus propias políticas. La eliminación de datos en GenViaYa no afecta la información almacenada por WhatsApp en los dispositivos de los usuarios ni en los servidores de Meta; para ello, deberás gestionar la solicitud directamente con WhatsApp desde la configuración de tu cuenta.",
+      },
+      {
+        id: "3.8",
+        title: "Autoridad de Protección de Datos",
+        body: "Si consideras que tu solicitud no ha sido atendida adecuadamente, tienes derecho a presentar una reclamación ante la Autoridad Nacional de Protección de Datos Personales del Ministerio de Justicia y Derechos Humanos del Perú.",
+      },
+    ],
+  },
 ];
