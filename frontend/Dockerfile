@@ -14,7 +14,7 @@ ARG COEXISTENCIA_USER
 ARG COEXISTENCIA_PASS
 COPY --from=build /app/out /usr/share/nginx/html
 
-# Credencial para proteger solo /test-coexistencia.html (no afecta el resto del sitio)
+# Credencial para proteger solo /whatsapp-cliente (no afecta el resto del sitio)
 RUN apk add --no-cache apache2-utils \
     && if [ -z "$COEXISTENCIA_USER" ] || [ -z "$COEXISTENCIA_PASS" ]; then \
         echo "ERROR: define COEXISTENCIA_USER y COEXISTENCIA_PASS en .env antes de construir" >&2; \
@@ -40,7 +40,12 @@ RUN printf 'server {\n\
     }\n\
 \n\
     # Acceso restringido: solo esta página pide usuario/clave, el resto del sitio queda libre\n\
-    location = /test-coexistencia.html {\n\
+    location = /whatsapp-cliente {\n\
+        auth_basic "Acceso restringido";\n\
+        auth_basic_user_file /etc/nginx/.htpasswd;\n\
+        try_files /whatsapp-cliente.html =404;\n\
+    }\n\
+    location = /whatsapp-cliente.html {\n\
         auth_basic "Acceso restringido";\n\
         auth_basic_user_file /etc/nginx/.htpasswd;\n\
         try_files $uri =404;\n\
