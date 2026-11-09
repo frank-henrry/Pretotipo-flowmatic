@@ -14,13 +14,18 @@ ARG COEXISTENCIA_USER
 ARG COEXISTENCIA_PASS
 COPY --from=build /app/out /usr/share/nginx/html
 
-# Credencial para proteger solo /whatsapp-cliente (no afecta el resto del sitio)
+# Credencial para proteger solo /whatsapp-cliente (no afecta el resto del sitio).
+# Si falta en el .env, NUNCA se cae el build de todo el sitio por esto: se genera
+# una clave aleatoria y queda impresa en el log de build para poder recuperarla.
 RUN apk add --no-cache apache2-utils \
-    && if [ -z "$COEXISTENCIA_USER" ] || [ -z "$COEXISTENCIA_PASS" ]; then \
-        echo "ERROR: define COEXISTENCIA_USER y COEXISTENCIA_PASS en .env antes de construir" >&2; \
-        exit 1; \
+    && WA_USER="${COEXISTENCIA_USER:-equipo}" \
+    && WA_PASS="${COEXISTENCIA_PASS:-$(head -c 32 /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 24)}" \
+    && if [ -z "$COEXISTENCIA_PASS" ]; then \
+        echo "AVISO: COEXISTENCIA_PASS no estaba en .env." \
+             "Clave generada para /whatsapp-cliente -> usuario: $WA_USER  clave: $WA_PASS" \
+             "(agrega COEXISTENCIA_USER/COEXISTENCIA_PASS al .env para que no cambie en cada build)"; \
     fi \
-    && htpasswd -cb /etc/nginx/.htpasswd "$COEXISTENCIA_USER" "$COEXISTENCIA_PASS" \
+    && htpasswd -cb /etc/nginx/.htpasswd "$WA_USER" "$WA_PASS" \
     && apk del apache2-utils
 
 # Config de Nginx: sirve la SPA + hace proxy del backend en /api/
