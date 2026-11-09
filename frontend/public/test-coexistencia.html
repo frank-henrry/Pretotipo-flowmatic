@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Conectar WhatsApp — GenviaYA</title>
+<link rel="icon" href="/logo-saas.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #22c55e;
+    --green-hover: #16a34a;
+    --green-dim: rgba(34, 197, 94, 0.12);
+    --background: #fafafa;
+    --surface: #ffffff;
+    --surface-2: #f4f4f5;
+    --border: #e4e4e7;
+    --text-primary: #09090b;
+    --text-secondary: #52525b;
+    --text-muted: #a1a1aa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text-primary);
+    font-family: "DM Sans", system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 48px 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+  .logo { height: 32px; display: block; margin-bottom: 24px; }
+  h1 {
+    font-family: "Syne", sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+  p.lead {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 24px;
+  }
+  button.primary {
+    width: 100%;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button.primary:hover { background: var(--green-hover); }
+  .hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 10px;
+  }
+  details.advanced {
+    margin-top: 28px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  details.advanced summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .advanced-body {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--surface-2);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+  }
+  .advanced-body p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+  button.secondary {
+    display: block;
+    width: 100%;
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13px;
+    margin-bottom: 8px;
+    cursor: pointer;
+  }
+  button.secondary:last-child { margin-bottom: 0; }
+  button.secondary:hover { border-color: var(--text-muted); color: var(--text-primary); }
+  h2.result-title {
+    font-family: "Syne", sans-serif;
+    font-size: 14px;
+    margin: 24px 0 8px;
+    color: var(--text-secondary);
+  }
+  pre#log {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text-secondary);
+    max-height: 260px;
+    overflow-y: auto;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <img class="logo" src="/logo-saas.png" alt="GenviaYA">
+  <h1>Conectar WhatsApp Business</h1>
+  <p class="lead">Vincula el número del cliente a GenviaYA sin que pierda la app de WhatsApp Business en su celular.</p>
+
+  <button class="primary" onclick="lanzar('A: SDK v24.0 + v4 + featureType', { setup: {}, featureType: 'whatsapp_business_app_onboarding', sessionInfoVersion: '3', version: 'v4' })">Iniciar conexión</button>
+  <p class="hint">Detente en "Verifica los detalles de tu cuenta" durante las pruebas.</p>
+
+  <details class="advanced">
+    <summary>Opciones de diagnóstico (B y C)</summary>
+    <div class="advanced-body">
+      <p>Usar solo si la opción principal falla. No son el flujo de producción.</p>
+      <button class="secondary" onclick="lanzar('B: SDK v24.0 + v5', { setup: {}, sessionInfoVersion: '3', version: 'v5' })">B · v5 (SDK v24.0)</button>
+      <button class="secondary" onclick="lanzar('C: SDK v24.0 + featureType sin version', { setup: {}, featureType: 'whatsapp_business_app_onboarding', sessionInfoVersion: '3' })">C · solo featureType (SDK v24.0)</button>
+    </div>
+  </details>
+
+  <h2 class="result-title">Resultado</h2>
+  <pre id="log">Esperando...</pre>
+</div>
+
+<script>
+  const APP_ID = '1805697003782808';
+  const CONFIG_ID = '2202065710731012';
+  const GRAPH_VERSION = 'v24.0'; // misma versión que usa YCloud
+
+  function log(msg) {
+    const el = document.getElementById('log');
+    el.textContent = (el.textContent === 'Esperando...' ? '' : el.textContent + '\n\n') + msg;
+  }
+
+  window.fbAsyncInit = function () {
+    FB.init({ appId: APP_ID, autoLogAppEvents: true, xfbml: true, version: GRAPH_VERSION });
+    log('SDK cargado (' + GRAPH_VERSION + ')');
+  };
+
+  // Eventos de la sesión de Embedded Signup (FINISH, CANCEL, ERROR, waba_id, etc.)
+  window.addEventListener('message', function (event) {
+    if (!event.origin.endsWith('facebook.com')) return;
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'WA_EMBEDDED_SIGNUP') log('Evento ES: ' + JSON.stringify(data, null, 2));
+    } catch (e) { /* mensajes que no son JSON */ }
+  });
+
+  function lanzar(nombre, extras) {
+    if (typeof FB === 'undefined') {
+      log('ERROR: el SDK de Facebook no cargó. Esta página debe abrirse desde tu dominio con HTTPS (registrado en "Dominios permitidos para el SDK de JavaScript"), no como archivo local ni en vista previa.');
+      return;
+    }
+    log('Lanzando ' + nombre + '\nextras: ' + JSON.stringify(extras));
+    FB.login(function (response) {
+      log('Respuesta FB.login (' + nombre + '): ' + JSON.stringify(response, null, 2));
+    }, {
+      config_id: CONFIG_ID,
+      response_type: 'code',
+      override_default_response_type: true,
+      extras: extras
+    });
+  }
+</script>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/es_LA/sdk.js"></script>
+</body>
+</html>
