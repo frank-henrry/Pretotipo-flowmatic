@@ -10,7 +10,18 @@ RUN npm run build
 
 # Etapa 2: Servidor de producción (Nginx)
 FROM nginx:stable-alpine
+ARG COEXISTENCIA_USER
+ARG COEXISTENCIA_PASS
 COPY --from=build /app/out /usr/share/nginx/html
+
+# Credencial para proteger solo /test-coexistencia.html (no afecta el resto del sitio)
+RUN apk add --no-cache apache2-utils \
+    && if [ -z "$COEXISTENCIA_USER" ] || [ -z "$COEXISTENCIA_PASS" ]; then \
+        echo "ERROR: define COEXISTENCIA_USER y COEXISTENCIA_PASS en .env antes de construir" >&2; \
+        exit 1; \
+    fi \
+    && htpasswd -cb /etc/nginx/.htpasswd "$COEXISTENCIA_USER" "$COEXISTENCIA_PASS" \
+    && apk del apache2-utils
 
 # Config de Nginx: sirve la SPA + hace proxy del backend en /api/
 RUN printf 'server {\n\
@@ -26,6 +37,13 @@ RUN printf 'server {\n\
         proxy_set_header Host $host;\n\
         proxy_set_header X-Real-IP $remote_addr;\n\
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
+    }\n\
+\n\
+    # Acceso restringido: solo esta página pide usuario/clave, el resto del sitio queda libre\n\
+    location = /test-coexistencia.html {\n\
+        auth_basic "Acceso restringido";\n\
+        auth_basic_user_file /etc/nginx/.htpasswd;\n\
+        try_files $uri =404;\n\
     }\n\
 \n\
     # Rutas estáticas de Next.js - intenta archivo, luego .html, luego fallback\n\
