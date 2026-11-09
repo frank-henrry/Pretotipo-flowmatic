@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Prueba coexistencia - GenviaYA</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+  button { display: block; width: 100%; margin: 10px 0; padding: 14px; font-size: 16px; cursor: pointer; }
+  pre { background: #f4f4f4; padding: 12px; white-space: pre-wrap; word-break: break-all; font-size: 13px; }
+</style>
+</head>
+<body>
+<h2>Prueba de coexistencia (GenviaYA)</h2>
+<p>Cada botón abre Embedded Signup con una combinación distinta. Prueba con el mismo número y anota cuál llega a "Verifica los detalles de tu cuenta".</p>
+
+<button onclick="lanzar('A: SDK v24.0 + v4 + featureType', { setup: {}, featureType: 'whatsapp_business_app_onboarding', sessionInfoVersion: '3', version: 'v4' })">A · v4 + featureType (SDK v24.0)</button>
+<button onclick="lanzar('B: SDK v24.0 + v5', { setup: {}, sessionInfoVersion: '3', version: 'v5' })">B · v5 (SDK v24.0)</button>
+<button onclick="lanzar('C: SDK v24.0 + featureType sin version', { setup: {}, featureType: 'whatsapp_business_app_onboarding', sessionInfoVersion: '3' })">C · solo featureType (SDK v24.0)</button>
+
+<h3>Resultado</h3>
+<pre id="log">Esperando...</pre>
+
+<script>
+  const APP_ID = '1805697003782808';
+  const CONFIG_ID = '2202065710731012';
+  const GRAPH_VERSION = 'v24.0'; // misma versión que usa YCloud
+
+  function log(msg) {
+    const el = document.getElementById('log');
+    el.textContent = (el.textContent === 'Esperando...' ? '' : el.textContent + '\n\n') + msg;
+  }
+
+  window.fbAsyncInit = function () {
+    FB.init({ appId: APP_ID, autoLogAppEvents: true, xfbml: true, version: GRAPH_VERSION });
+    log('SDK cargado (' + GRAPH_VERSION + ')');
+  };
+
+  // Eventos de la sesión de Embedded Signup (FINISH, CANCEL, ERROR, waba_id, etc.)
+  window.addEventListener('message', function (event) {
+    if (!event.origin.endsWith('facebook.com')) return;
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'WA_EMBEDDED_SIGNUP') log('Evento ES: ' + JSON.stringify(data, null, 2));
+    } catch (e) { /* mensajes que no son JSON */ }
+  });
+
+  function lanzar(nombre, extras) {
+    if (typeof FB === 'undefined') {
+      log('ERROR: el SDK de Facebook no cargó. Esta página debe abrirse desde tu dominio con HTTPS (registrado en "Dominios permitidos para el SDK de JavaScript"), no como archivo local ni en vista previa.');
+      return;
+    }
+    log('Lanzando ' + nombre + '\nextras: ' + JSON.stringify(extras));
+    FB.login(function (response) {
+      log('Respuesta FB.login (' + nombre + '): ' + JSON.stringify(response, null, 2));
+    }, {
+      config_id: CONFIG_ID,
+      response_type: 'code',
+      override_default_response_type: true,
+      extras: extras
+    });
+  }
+</script>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/es_LA/sdk.js"></script>
+</body>
+</html>
