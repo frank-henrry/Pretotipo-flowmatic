@@ -35,8 +35,6 @@ services:
       args:
         - VITE_API_URL=${VITE_API_URL}
         - NEXT_PUBLIC_ADMIN_SECRET=${NEXT_PUBLIC_ADMIN_SECRET}
-        - COEXISTENCIA_USER=${COEXISTENCIA_USER}
-        - COEXISTENCIA_PASS=${COEXISTENCIA_PASS}
     container_name: flowmatic_frontend
     restart: always
     ports:
