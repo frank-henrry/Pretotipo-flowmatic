@@ -1,7 +1,9 @@
 import os
 import re
+import secrets
 import html as html_module
-from datetime import datetime, timezone
+import bcrypt
+from datetime import datetime, timedelta, timezone
 from fastapi import FastAPI, HTTPException, Depends, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -49,6 +51,21 @@ class Lead(Base):
     phone           = Column(String(20))
     restaurant_type = Column(String(50), nullable=True)
     created_at      = Column(String)
+
+class TeamUser(Base):
+    __tablename__ = "team_users"
+    id            = Column(Integer, primary_key=True, index=True)
+    username      = Column(String(50), unique=True, index=True, nullable=False)
+    password_hash = Column(String(100), nullable=False)
+    created_at    = Column(String)
+
+class TeamSession(Base):
+    __tablename__ = "team_sessions"
+    token      = Column(String(64), primary_key=True)
+    user_id    = Column(Integer, nullable=False)
+    username   = Column(String(50), nullable=False)
+    created_at = Column(String)
+    expires_at = Column(String)
 
 # ── Sanitization helpers ───────────────────────────────────────────────────
 _HTML_TAG_RE  = re.compile(r"<[^>]+>", re.IGNORECASE)
@@ -174,6 +191,26 @@ class LeadCreate(BaseModel):
         return sanitize(v)[:50] or None
 
 
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+    password: str = Field(min_length=8, max_length=100)
+
+
+class TeamUserCreate(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+    password: str = Field(min_length=8, max_length=100)
+
+    @field_validator("username", mode="before")
+    @classmethod
+    def clean_username(cls, v):
+        if not isinstance(v, str):
+            raise ValueError("Debe ser texto")
+        v = sanitize(v).lower()
+        if not re.match(r"^[a-z0-9_.-]{3,50}$", v):
+            raise ValueError("Usuario inválido (solo letras, números, . _ -)")
+        return v
+
+
 # ── Rate limiter ───────────────────────────────────────────────────────────
 limiter = Limiter(key_func=get_remote_address)
 
@@ -214,7 +251,7 @@ app.add_middleware(
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type", "X-Admin-Secret"],
+    allow_headers=["Content-Type", "X-Admin-Secret", "X-Session-Token"],
 )
 
 @app.middleware("http")
@@ -245,6 +282,34 @@ def get_db():
 def verify_admin(x_admin_secret: Optional[str] = Header(None)):
     if not x_admin_secret or x_admin_secret != ADMIN_SECRET:
         raise HTTPException(status_code=401, detail="No autorizado")
+
+SESSION_DURATION_HOURS = 12
+
+def create_session(db: Session, user: TeamUser) -> dict:
+    token = secrets.token_urlsafe(32)
+    now = datetime.now(timezone.utc)
+    expires = now + timedelta(hours=SESSION_DURATION_HOURS)
+    db.add(TeamSession(
+        token      = token,
+        user_id    = user.id,
+        username   = user.username,
+        created_at = now.isoformat(),
+        expires_at = expires.isoformat(),
+    ))
+    db.commit()
+    return {"token": token, "expires_at": expires.isoformat()}
+
+def verify_session(x_session_token: Optional[str] = Header(None), db: Session = Depends(get_db)) -> str:
+    if not x_session_token:
+        raise HTTPException(status_code=401, detail="No autenticado")
+    session = db.query(TeamSession).filter(TeamSession.token == x_session_token).first()
+    if not session:
+        raise HTTPException(status_code=401, detail="Sesión inválida")
+    if datetime.fromisoformat(session.expires_at) < datetime.now(timezone.utc):
+        db.delete(session)
+        db.commit()
+        raise HTTPException(status_code=401, detail="Sesión expirada")
+    return session.username
 
 # ── Public endpoints ───────────────────────────────────────────────────────
 @app.get("/")
@@ -283,6 +348,26 @@ def create_lead(request: Request, lead: LeadCreate, db: Session = Depends(get_db
     db.commit()
     db.refresh(db_lead)
     return {"status": "success", "lead_id": db_lead.id}
+
+# ── Login del equipo (para /whatsapp-cliente) ──────────────────────────────
+@app.post("/auth/login")
+@limiter.limit("5/minute")
+def login(request: Request, creds: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(TeamUser).filter(TeamUser.username == creds.username.lower()).first()
+    if not user or not bcrypt.checkpw(creds.password.encode(), user.password_hash.encode()):
+        raise HTTPException(status_code=401, detail="Usuario o clave incorrectos")
+    return create_session(db, user)
+
+@app.get("/auth/me")
+def me(username: str = Depends(verify_session)):
+    return {"username": username}
+
+@app.post("/auth/logout")
+def logout(x_session_token: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    if x_session_token:
+        db.query(TeamSession).filter(TeamSession.token == x_session_token).delete()
+        db.commit()
+    return {"status": "ok"}
 
 # ── Admin endpoints (require X-Admin-Secret header) ────────────────────────
 @app.get("/admin/leads", dependencies=[Depends(verify_admin)])
@@ -324,3 +409,35 @@ def get_stats(db: Session = Depends(get_db)):
         "total_leads":  db.query(Lead).count(),
         "total_orders": db.query(Order).count(),
     }
+
+# ── Admin: usuarios del equipo (login de /whatsapp-cliente) ────────────────
+@app.post("/admin/team-users", status_code=201, dependencies=[Depends(verify_admin)])
+def create_team_user(user: TeamUserCreate, db: Session = Depends(get_db)):
+    if db.query(TeamUser).filter(TeamUser.username == user.username).first():
+        raise HTTPException(status_code=409, detail="Ese usuario ya existe")
+    password_hash = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt()).decode()
+    db_user = TeamUser(
+        username      = user.username,
+        password_hash = password_hash,
+        created_at    = datetime.now(timezone.utc).isoformat(),
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return {"status": "success", "id": db_user.id, "username": db_user.username}
+
+@app.get("/admin/team-users", dependencies=[Depends(verify_admin)])
+def list_team_users(db: Session = Depends(get_db)):
+    users = db.query(TeamUser).order_by(TeamUser.id.desc()).all()
+    return [{"id": u.id, "username": u.username, "created_at": u.created_at} for u in users]
+
+@app.delete("/admin/team-users/{user_id}", dependencies=[Depends(verify_admin)])
+def delete_team_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(TeamUser).filter(TeamUser.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="No encontrado")
+    db.delete(user)
+    db.commit()
+    db.query(TeamSession).filter(TeamSession.user_id == user_id).delete()
+    db.commit()
+    return {"status": "deleted"}
